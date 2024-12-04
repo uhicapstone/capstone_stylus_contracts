@@ -5,7 +5,7 @@
 extern crate alloc;
 
 use stylus_sdk::{
-    evm,
+    // evm,
     alloy_primitives::{U256, FixedBytes}, 
     prelude::*,
     alloy_sol_types::sol,
@@ -19,16 +19,16 @@ sol! {
     #[derive(Debug)] 
     error InvalidInput();
 
-    event InsuranceFeeCalculated(
-        bytes32 indexed pool_id,
-        uint256 amount,
-        uint256 fee
-    );
+    // event InsuranceFeeCalculated(
+    //     bytes32 indexed pool_id,
+    //     uint256 amount,
+    //     uint256 fee
+    // );
 
-    event VolatilityUpdated(
-        bytes32 indexed pool_id,
-        uint256 volatility
-    );
+    // event VolatilityUpdated(
+    //     bytes32 indexed pool_id,
+    //     uint256 volatility
+    // );
 }
 
 #[derive(SolidityError, Debug)]
@@ -143,11 +143,11 @@ impl InsuranceCalculator {
             .ok_or(Error::CalculationError(CalculationError{}))?;
 
         // Emit event
-        evm::log(InsuranceFeeCalculated {
-            pool_id,
-            amount,
-            fee
-        });
+        // evm::log(InsuranceFeeCalculated {
+        //     pool_id,
+        //     amount,
+        //     fee
+        // });
 
         Ok(fee)
     }
@@ -234,10 +234,10 @@ impl InsuranceCalculator {
             .ok_or(Error::CalculationError(CalculationError{}))?;
 
         // Emit event
-        evm::log(VolatilityUpdated {
-            pool_id,
-            volatility
-        });
+        // evm::log(VolatilityUpdated {
+        //     pool_id,
+        //     volatility
+        // });
 
         Ok(volatility)
     }

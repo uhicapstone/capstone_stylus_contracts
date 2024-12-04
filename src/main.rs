@@ -3,7 +3,7 @@
 #[cfg(feature = "export-abi")]
 fn main() {
     stylus_sdk::export_abi!(
-        stylus_insurance_calculator,
+        InsuranceCalculator,
         "MIT-OR-APACHE-2.0",
         "pragma solidity ^0.8.23;"
     );

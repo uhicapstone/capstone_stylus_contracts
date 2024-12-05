@@ -241,4 +241,61 @@ impl InsuranceCalculator {
 
         Ok(volatility)
     }
+
+    /// Pure calculation function that doesn't modify state
+    pub fn calculate_flash_loan_fee(
+        &self,
+        amount: U256,
+        total_liquidity: U256,
+        utilization_rate: U256,
+        default_history: U256,
+    ) -> Result<U256, Error> {
+        // Base fee of 0.05%
+        let base_fee = U256::from(500_000_000_000_000u64); 
+
+        // Pure calculations without state modifications
+        let utilization_multiplier = if utilization_rate > U256::ZERO {
+            utilization_rate
+                .checked_mul(U256::from(2e18))
+                .and_then(|v| v.checked_div(U256::from(1e18)))
+                .and_then(|v| v.checked_add(U256::from(1e18)))
+                .ok_or(Error::CalculationError(CalculationError{}))?
+        } else {
+            U256::from(1e18)
+        };
+
+        let liquidity_multiplier = if total_liquidity > U256::ZERO {
+            let liquidity_factor = U256::from(1e18)
+                .checked_mul(U256::from(1e18))
+                .and_then(|v| v.checked_div(total_liquidity.checked_add(U256::from(1e18)).unwrap_or(U256::from(1))))
+                .ok_or(Error::CalculationError(CalculationError{}))?;
+            U256::from(1e18)
+                .checked_add(liquidity_factor)
+                .ok_or(Error::CalculationError(CalculationError{}))?
+        } else {
+            U256::from(2e18)
+        };
+
+        let default_multiplier = U256::from(1e18)
+            .checked_add(default_history)
+            .ok_or(Error::CalculationError(CalculationError{}))?;
+
+        // Calculate final fee
+        let fee = base_fee
+            .checked_mul(utilization_multiplier)
+            .and_then(|v| v.checked_mul(liquidity_multiplier))
+            .and_then(|v| v.checked_mul(default_multiplier))
+            .and_then(|v| v.checked_div(U256::from(1e18)))
+            .and_then(|v| v.checked_div(U256::from(1e18)))
+            .and_then(|v| v.checked_div(U256::from(1e18)))
+            .ok_or(Error::CalculationError(CalculationError{}))?;
+
+        // Scale fee by amount
+        let final_fee = fee
+            .checked_mul(amount)
+            .and_then(|v| v.checked_div(U256::from(1e18)))
+            .ok_or(Error::CalculationError(CalculationError{}))?;
+
+        Ok(final_fee)
+    }
 }
